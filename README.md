@@ -14,8 +14,8 @@ A full-fledged RSTFUL application on the control of notes with authorization sup
 - Go >= 1.20
 
 ## Code structure
+![alt text](<Снимок экрана 2025-06-20 в 23.23.23.png>)
 
-![alt text](image.png)
 ## ⚙️ Установка и запуск
 
 1. **Клонируйте репозиторий:**
