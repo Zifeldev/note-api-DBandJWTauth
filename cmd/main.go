@@ -1,22 +1,39 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"note-manager-api/internals/auth"
 	"note-manager-api/internals/db"
+	"note-manager-api/internals/migrate"
 	"note-manager-api/internals/note"
 	"note-manager-api/internals/redis"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	db.DBConnect()
+
+	dsn := os.Getenv("DATABASE_URL")
+
+	if dsn == "" {
+		dsn = "postgres://user:password@localhost:5432/noteManager?sslmode=disable"
+	}
+
+	if err := db.DBConnect(dsn); err != nil {
+		log.Fatalf("pgx pool init failed: %v", err)
+	}
+
+	if err := migrate.RunMigrations(dsn); err != nil {
+		log.Fatalf("Migration failed: %v", err)
+	}
+
 	redis.ConnectRedis()
 	r := gin.Default()
 	r.POST("/register", auth.Register)
 	r.POST("/login", auth.Login)
-	r.LoadHTMLGlob("../templates/*")
+	r.LoadHTMLGlob("templates/*")
 
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", nil)
@@ -33,5 +50,10 @@ func main() {
 		protected.POST("/favorites/:note_id", note.CreateFav)
 		protected.DELETE("/favorites/:note_id", note.DeleteFavNote)
 	}
-	r.Run(":8484")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8484"
+	}
+	r.Run(":" + port)
+
 }

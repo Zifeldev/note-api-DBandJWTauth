@@ -53,32 +53,26 @@
   function register() {
     const username = document.getElementById("reg-username").value;
     const password = document.getElementById("reg-password").value;
-
     if (!username || !password) return alert("Fill in all fields");
 
     fetch("/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password })
-    })
-      .then(res => res.json())
-      .then(data => {
-        alert(data.message || data.error || "Registered");
-      });
+    }).then(res => res.json())
+      .then(data => alert(data.message || data.error || "Registered"));
   }
 
   function login() {
     const username = document.getElementById("login-username").value;
     const password = document.getElementById("login-password").value;
-
     if (!username || !password) return alert("Fill in all fields");
 
     fetch("/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password })
-    })
-      .then(res => res.json())
+    }).then(res => res.json())
       .then(data => {
         if (data.token) {
           token = data.token;
@@ -132,11 +126,34 @@
     }).then(() => loadNotes());
   }
 
+  function showEditForm(id, title, content) {
+    const form = document.getElementById(`edit-form-${id}`);
+    if (form) form.classList.remove("hidden");
+  }
+
+  function cancelEdit(id) {
+    const form = document.getElementById(`edit-form-${id}`);
+    if (form) form.classList.add("hidden");
+  }
+
+  function submitEdit(id) {
+    const title = document.getElementById(`edit-title-${id}`).value;
+    const content = document.getElementById(`edit-content-${id}`).value;
+
+    fetch(`/api/notes/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ title, content })
+    }).then(() => loadNotes());
+  }
+
   function loadNotes() {
     fetch("/api/notes", {
       headers: { "Authorization": "Bearer " + token }
-    })
-      .then(res => res.json())
+    }).then(res => res.json())
       .then(data => {
         const container = document.getElementById("notes");
         container.innerHTML = "";
@@ -148,6 +165,13 @@
             ${note.content}<br/>
             <button onclick="deleteNote(${note.id})">Delete</button>
             <button onclick="addFavorite(${note.id})">Add to Favorites</button>
+            <button onclick="showEditForm(${note.id}, '${note.title}', '${note.content}')">Edit</button>
+            <div id="edit-form-${note.id}" class="hidden">
+              <input id="edit-title-${note.id}" value="${note.title}" />
+              <input id="edit-content-${note.id}" value="${note.content}" />
+              <button onclick="submitEdit(${note.id})">Save</button>
+              <button onclick="cancelEdit(${note.id})">Cancel</button>
+            </div>
           `;
           container.appendChild(div);
         });
@@ -155,8 +179,7 @@
 
     fetch("/api/favorites", {
       headers: { "Authorization": "Bearer " + token }
-    })
-      .then(res => res.json())
+    }).then(res => res.json())
       .then(data => {
         const container = document.getElementById("favorites");
         container.innerHTML = "";
@@ -173,9 +196,10 @@
       });
   }
 
-  
   if (token) {
     setAuthState(true);
     loadNotes();
   }
 </script>
+</body>
+</html>

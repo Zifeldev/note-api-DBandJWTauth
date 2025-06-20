@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:17
+    container_name: note_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: noteManager
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: note_manager_api_redis
+    ports:
+      - "6379:6379"
+  note_api:
+    build: .
+    ports:
+      - "8484:8484"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://user:password@note_db:5432/noteManager?sslmode=disable
+volumes:
+  postgres_data:
