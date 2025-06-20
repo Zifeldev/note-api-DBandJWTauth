@@ -15,35 +15,7 @@ A full-fledged RSTFUL application on the control of notes with authorization sup
 
 ## Code structure
 
-note-manager-api/
-├── cmd/ # Точка входа: main.go
-├── internals/ # Логика приложения (auth, note, favorite, db, redis)
-│ ├── auth/
-│ ├── note/
-│ ├── db/
-│ ├── redis/
-│ └── migrate/ 
-│ └── migrations/ # SQL-миграции (goose)
-├── templates/ # HTML-шаблоны(Создан ИИ)
-├── Dockerfile # Сборка контейнера
-├── docker-compose.yml # Запуск всей системы
-├── go.mod / go.sum # Зависимости
-└── README.md # Этот файл
-
-note-manager-api/
-├── cmd/ # Entrance point: Main.go
-├── internals/ # Application Logic (Auth, Note, Favorite, DB, Redis)
-│ ├── auth/
-│ ├── note/
-│ ├── db/
-│ ├── redis/
-│ └── migrate/
-│ └──migrations/ # SQL Migration (Goose)
-├── templates/ # html-shapes (created by AI)
-├── Dockerfile
-├── docker-compose.yml # launch of the entire system
-├── go.mod / go.sum # Dependencies
-└── README.md # This file
+![alt text](image.png)
 ## ⚙️ Установка и запуск
 
 1. **Клонируйте репозиторий:**
