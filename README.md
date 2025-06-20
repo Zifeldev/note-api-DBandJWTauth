@@ -14,8 +14,8 @@ A full-fledged RSTFUL application on the control of notes with authorization sup
 - Go >= 1.20
 
 ## Code structure
-![alt text](<Снимок экрана 2025-06-20 в 23.23.23.png>)
 
+![alt text](<Снимок экрана 2025-06-20 в 23.24.47.png>)
 ## ⚙️ Установка и запуск
 
 1. **Клонируйте репозиторий:**
@@ -125,4 +125,5 @@ goose -dir migrations postgres "$DATABASE_URL" up
 
 Автор/Author
 GitHub: @zifeldev
-
+Если есть какие-то ошибки или проблемы можете давать обратную связь я буду рад всему фидбеку
+If there are any errors or problems, you can give feedback, I will be glad to all feedback
