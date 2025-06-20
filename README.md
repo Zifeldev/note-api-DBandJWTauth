@@ -20,12 +20,7 @@ A full-fledged RSTFUL application on the control of notes with authorization sup
 
 1. **Клонируйте репозиторий:**
 bash
-git clone https://github.com/your-username/note-manager-api.git
-cd note-manager-api
-2. Запустите всё через Docker Compose:
-
-bash
-clone https://github.com/your-username/note-manager-api.git
+git clone https://github.com/Zifeldev/note-api-DBandJWTauth
 cd note-manager-api
 
 2.Запусти всё через Docker Compose:
@@ -38,13 +33,8 @@ http://localhost:8484
 
 1. ** Clon the repository: **
 bash
-GIT CLONE https://github.com/your-username/note-manager-opi.git
-CD Note-Manager-API
-2. Run everything through the Docker Compose:
-
-Bash
-clone https://github.com/your-username/note-manager-api.git
-CD Note-Manager-API
+GIT CLONE https://github.com/Zifeldev/note-api-DBandJWTauth
+cd Note-Manager-API
 
 2. Let’s go all through Docker Compose:
 Docker-Compose up-Build
