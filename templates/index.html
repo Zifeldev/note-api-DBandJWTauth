@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<!--This page was created by AI(only this page)-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Note Manager</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .hidden { display: none; }
+    .note { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+    button { margin: 2px; }
+  </style>
+</head>
+<body>
+  <h1>Note Manager</h1>
+
+  <div id="auth-section">
+    <h2>Login</h2>
+    <input id="login-username" placeholder="Username" />
+    <input id="login-password" placeholder="Password" type="password" />
+    <button onclick="login()">Login</button>
+
+    <h2>Register</h2>
+    <input id="reg-username" placeholder="Username" />
+    <input id="reg-password" placeholder="Password" type="password" />
+    <button onclick="register()">Register</button>
+  </div>
+
+  <div id="app-section" class="hidden">
+    <button onclick="logout()">Logout</button>
+
+    <h2>Create Note</h2>
+    <input id="note-title" placeholder="Title" />
+    <input id="note-content" placeholder="Content" />
+    <button onclick="createNote()">Add Note</button>
+
+    <h2>Your Notes</h2>
+    <div id="notes"></div>
+
+    <h2>Favorites</h2>
+    <div id="favorites"></div>
+  </div>
+
+<script>
+  let token = localStorage.getItem("token");
+
+  function setAuthState(authenticated) {
+    document.getElementById("auth-section").classList.toggle("hidden", authenticated);
+    document.getElementById("app-section").classList.toggle("hidden", !authenticated);
+  }
+
+  function register() {
+    const username = document.getElementById("reg-username").value;
+    const password = document.getElementById("reg-password").value;
+    if (!username || !password) return alert("Fill in all fields");
+
+    fetch("/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    }).then(res => res.json())
+      .then(data => alert(data.message || data.error || "Registered"));
+  }
+
+  function login() {
+    const username = document.getElementById("login-username").value;
+    const password = document.getElementById("login-password").value;
+    if (!username || !password) return alert("Fill in all fields");
+
+    fetch("/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    }).then(res => res.json())
+      .then(data => {
+        if (data.token) {
+          token = data.token;
+          localStorage.setItem("token", token);
+          setAuthState(true);
+          loadNotes();
+        } else {
+          alert(data.message || data.error || "Login failed");
+        }
+      });
+  }
+
+  function logout() {
+    localStorage.removeItem("token");
+    token = null;
+    setAuthState(false);
+  }
+
+  function createNote() {
+    const title = document.getElementById("note-title").value;
+    const content = document.getElementById("note-content").value;
+
+    fetch("/api/notes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ title, content })
+    }).then(() => loadNotes());
+  }
+
+  function deleteNote(id) {
+    fetch(`/api/notes/${id}`, {
+      method: "DELETE",
+      headers: { "Authorization": "Bearer " + token }
+    }).then(() => loadNotes());
+  }
+
+  function addFavorite(id) {
+    fetch(`/api/favorites/${id}`, {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + token }
+    }).then(() => loadNotes());
+  }
+
+  function removeFavorite(id) {
+    fetch(`/api/favorites/${id}`, {
+      method: "DELETE",
+      headers: { "Authorization": "Bearer " + token }
+    }).then(() => loadNotes());
+  }
+
+  function showEditForm(id, title, content) {
+    const form = document.getElementById(`edit-form-${id}`);
+    if (form) form.classList.remove("hidden");
+  }
+
+  function cancelEdit(id) {
+    const form = document.getElementById(`edit-form-${id}`);
+    if (form) form.classList.add("hidden");
+  }
+
+  function submitEdit(id) {
+    const title = document.getElementById(`edit-title-${id}`).value;
+    const content = document.getElementById(`edit-content-${id}`).value;
+
+    fetch(`/api/notes/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ title, content })
+    }).then(() => loadNotes());
+  }
+
+  function loadNotes() {
+    fetch("/api/notes", {
+      headers: { "Authorization": "Bearer " + token }
+    }).then(res => res.json())
+      .then(data => {
+        const container = document.getElementById("notes");
+        container.innerHTML = "";
+        data.forEach(note => {
+          const div = document.createElement("div");
+          div.className = "note";
+          div.innerHTML = `
+            <strong>${note.title}</strong><br/>
+            ${note.content}<br/>
+            <button onclick="deleteNote(${note.id})">Delete</button>
+            <button onclick="addFavorite(${note.id})">Add to Favorites</button>
+            <button onclick="showEditForm(${note.id}, '${note.title}', '${note.content}')">Edit</button>
+            <div id="edit-form-${note.id}" class="hidden">
+              <input id="edit-title-${note.id}" value="${note.title}" />
+              <input id="edit-content-${note.id}" value="${note.content}" />
+              <button onclick="submitEdit(${note.id})">Save</button>
+              <button onclick="cancelEdit(${note.id})">Cancel</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      });
+
+    fetch("/api/favorites", {
+      headers: { "Authorization": "Bearer " + token }
+    }).then(res => res.json())
+      .then(data => {
+        const container = document.getElementById("favorites");
+        container.innerHTML = "";
+        data.forEach(note => {
+          const div = document.createElement("div");
+          div.className = "note";
+          div.innerHTML = `
+            <strong>${note.title}</strong><br/>
+            ${note.content}<br/>
+            <button onclick="removeFavorite(${note.id})">Remove from Favorites</button>
+          `;
+          container.appendChild(div);
+        });
+      });
+  }
+
+  if (token) {
+    setAuthState(true);
+    loadNotes();
+  }
+</script>
+</body>
+</html>
